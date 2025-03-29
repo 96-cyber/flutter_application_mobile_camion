@@ -3,6 +3,7 @@ import 'package:flutter_application_mobile_camion/Screens/home.dart';
 import 'package:flutter_application_mobile_camion/loginScreens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mobile_camion/screens.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:get/get.dart';
 import '../../shared/colors.dart';
@@ -95,8 +96,37 @@ class _RegisterPageState extends State<RegisterPage> {
               const SizedBox(
                 height: 30,
               ),
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black),
+                    color: Colors.white, borderRadius: BorderRadius.circular(25)),
+                child: Center(
+                  child: DropdownButton<String>(
+                    value: selectedRole,
+                    icon: const Icon(Icons.arrow_downward,color: Colors.black,),
+                    iconSize: 24,
+                    elevation: 16,
+                    style: const TextStyle(color: Colors.black, fontSize: 16),
+                    onChanged: (newValue) {
+                      setState(() {
+                        selectedRole = newValue!;
+                      });
+                    },
+                    hint: const Text('ajouter votre role  ',style: TextStyle(color: Colors.black, fontSize: 16),),
+                    underline: Container(),
+                    items: <String>['chauffeur', 'mecanicien' ]
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
               const SizedBox(
-                height: 10,
+                height: 30,
               ),
                 TextFormField(
                     validator: (value) {
@@ -244,7 +274,7 @@ class _RegisterPageState extends State<RegisterPage> {
                           onPressed: () async {
                             
                      
-                      Get.off(() => const HomePage(),
+                      Get.off(() => const Screens(),
                       transition: Transition.downToUp);
 
                           },

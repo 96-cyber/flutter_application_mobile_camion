@@ -1,13 +1,17 @@
 // ignore_for_file: unused_local_variable, depend_on_referenced_packages
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import "package:flutter_application_mobile_camion/Screens/home.dart";
 import 'package:flutter_application_mobile_camion/loginScreens/registartiontextfield.dart';
 import 'package:flutter_application_mobile_camion/loginScreens/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mobile_camion/screens.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:get/get.dart';
+import 'package:quickalert/quickalert.dart';
 import '../../shared/colors.dart';
 
 class LoginPage extends StatefulWidget {
@@ -24,7 +28,45 @@ class _LoginPageState extends State<LoginPage> {
   bool isPasswordVisible = true;
   bool isLoading = false;
 
- 
+  login() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const Screens()));
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Oops...',
+          text: 'utilisateur non trouvé!',
+        );
+      } else if (e.code == 'wrong-password') {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Oops...',
+          text: 'mot de passe incorrect!',
+        );
+      } else {
+        QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: 'Oops...',
+          text: 'Vérifiez votre e-mail ou votre mot de passe!',
+        );
+      }
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   @override
   void dispose() {
     emailController.dispose();
@@ -35,9 +77,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text('Parc GMAO', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),),
+        title: const Text(
+          'Parc GMAO',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
       ),
       resizeToAvoidBottomInset: false,
       body: Padding(
@@ -73,8 +120,10 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 const Row(
                   children: [
-                    Text("Accédez à votre espace personnel en toute sécurité.",
-                        style: TextStyle(color: Colors.black)),
+                    Expanded(
+                      child: Text("Accédez à votre espace personnel en toute sécurité.",
+                          style: TextStyle(color: Colors.black)),
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -171,36 +220,45 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   children: [
                     Expanded(
-                        child: ElevatedButton(
-                            onPressed: () async {
-                                Get.off(() => const HomePage(),
-                        transition: Transition.downToUp);
-                            },
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  WidgetStateProperty.all(mainColor),
-                              padding: isLoading
-                                  ? WidgetStateProperty.all(
-                                      const EdgeInsets.all(10))
-                                  : WidgetStateProperty.all(
-                                      const EdgeInsets.all(13)),
-                              shape: WidgetStateProperty.all(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(25))),
-                            ),
-                            child: isLoading
-                                ? Center(
-                                    child: LoadingAnimationWidget
-                                        .staggeredDotsWave(
-                                      color: whiteColor,
-                                      size: 32,
-                                    ),
-                                  )
-                                : const Text(
-                                    "Connecter",
-                                    style: TextStyle(
-                                        fontSize: 16, color: whiteColor, fontWeight: FontWeight.bold),
-                                  ))),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (formstate.currentState!.validate()) {
+                            await login();
+                          } else {
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.error,
+                              title: 'Erreur',
+                              text: 'Entrez votre e-mail et votre mot de passe',
+                            );
+                          }
+                        },
+                        style: ButtonStyle(
+                          backgroundColor: WidgetStateProperty.all(mainColor),
+                          padding: isLoading
+                              ? WidgetStateProperty.all(
+                                  const EdgeInsets.all(10))
+                              : WidgetStateProperty.all(
+                                  const EdgeInsets.all(13)),
+                          shape: WidgetStateProperty.all(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(25))),
+                        ),
+                        child: isLoading
+                            ? Center(
+                                child: LoadingAnimationWidget.staggeredDotsWave(
+                                  color: whiteColor,
+                                  size: 32,
+                                ),
+                              )
+                            : const Text(
+                                "Connecter",
+                                style: TextStyle(
+                                    fontSize: 16,
+                                    color: whiteColor,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(
@@ -209,7 +267,8 @@ class _LoginPageState extends State<LoginPage> {
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   const Text(
                     "Vous n'avez pas de compte?",
-                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.w500),
                   ),
                   TextButton(
                       onPressed: () {
@@ -218,7 +277,10 @@ class _LoginPageState extends State<LoginPage> {
                       },
                       child: const Text(
                         "S'enregistrer",
-                        style: TextStyle(color: mainColor, fontWeight: FontWeight.bold, fontSize: 17),
+                        style: TextStyle(
+                            color: mainColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17),
                       ))
                 ])
               ],

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "468946443064",
+    "project_id": "camionappllication",
+    "storage_bucket": "camionappllication.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468946443064:android:f90255886add6a0b31ffcd",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_mobile_camion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOVLF8c-Aw5_Wvg_hNCBvK9tU7jb-RQ0A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

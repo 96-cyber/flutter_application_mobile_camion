@@ -1,0 +1,2 @@
+C:/Users/degan/OneDrive/Desktop/camion/flutter_application_mobile_camion/android/app/.cxx/Debug/2910m1h5/x86/CMakeFiles/edit_cache.dir
+C:/Users/degan/OneDrive/Desktop/camion/flutter_application_mobile_camion/android/app/.cxx/Debug/2910m1h5/x86/CMakeFiles/rebuild_cache.dir

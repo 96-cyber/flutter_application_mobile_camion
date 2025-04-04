@@ -1,14 +1,21 @@
+// ignore_for_file: deprecated_member_use
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mobile_camion/shared/customtextfield.dart';
 import 'package:gap/gap.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:uuid/uuid.dart';
 
 import '../shared/colors.dart';
+import '../shared/snackbar.dart';
 
 class AjouterMission extends StatefulWidget {
-  const AjouterMission({super.key});
+  final String camionId;
+  final String userId;
+  AjouterMission({super.key, required this.camionId, required this.userId});
 
   @override
   State<AjouterMission> createState() => _AjouterMissionState();
@@ -21,24 +28,57 @@ class _AjouterMissionState extends State<AjouterMission> {
   bool isPicking = false;
   bool isPicking_2 = false;
   String newMissionId = const Uuid().v1();
-
-
+  bool isLoading = false;
 
   TextEditingController pointdepartController = TextEditingController();
   TextEditingController destinationController = TextEditingController();
   TextEditingController distanceController = TextEditingController();
   TextEditingController consommationController = TextEditingController();
 
+  ajouterMission() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      CollectionReference mission = FirebaseFirestore.instance
+          .collection('camions')
+          .doc(widget.camionId)
+          .collection("missions");
+      String newMissionId = const Uuid().v1();
+      mission.doc(newMissionId).set({
+        'mission_id': newMissionId,
+        'user_id': widget.userId,
+        'start_date': startDate,
+        'end_date': finDate,
+        'point_depart': pointdepartController.text,
+        'destination': destinationController.text,
+        'distance': distanceController.text,
+        'consommation': consommationController.text,
+      });
+    } catch (err) {
+      if (!mounted) return;
+      showSnackBar(context, "Erreur :  $err ");
+    }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
   afficherAlert() {
     QuickAlert.show(
       context: context,
       type: QuickAlertType.success,
-      text: 'Mission ajouter avec succes!',
-      onConfirmBtnTap: () {
-        pointdepartController.clear();
-        destinationController.clear();
-        distanceController.clear();
-        consommationController.clear();
+      text: 'Votre mission a été ajoutée !',
+      onConfirmBtnTap: () async {
+        setState(() {
+          pointdepartController.clear();
+          destinationController.clear();
+          distanceController.clear();
+          consommationController.clear();
+          isPicking = false;
+          isPicking_2 = false;
+        });
         Navigator.of(context).pop();
       },
     );
@@ -47,8 +87,10 @@ class _AjouterMissionState extends State<AjouterMission> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         centerTitle: true,
         title: const Text(
           "Ajouter une Mission",
@@ -69,8 +111,7 @@ class _AjouterMissionState extends State<AjouterMission> {
             children: [
               const Gap(30),
               const Text("Date debut",
-                  style:  TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
               const SizedBox(
                 height: 10,
               ),
@@ -82,7 +123,7 @@ class _AjouterMissionState extends State<AjouterMission> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100));
                   if (newStartDate == null) return;
-
+          
                   setState(() {
                     isPicking = true;
                     startDate = newStartDate;
@@ -90,27 +131,29 @@ class _AjouterMissionState extends State<AjouterMission> {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 5),
-
+          
                   height: 48,
                   // width: MediaQuery.sizeOf(context).width * 0.43,
                   decoration: BoxDecoration(
                       // color: const Color.fromARGB(255, 255, 255, 255),
                       border: Border.all(color: Colors.black, width: 0.75),
                       borderRadius: BorderRadius.circular(12)),
-                  child: Center(
-                      child: isPicking
-                          ? Text(
-                              "${startDate.day}/${startDate.month}/${startDate.year}",
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700),
-                            )
-                          : const Text("")),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12.0),
+                    child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: isPicking
+                            ? Text(
+                                "${startDate.day}/${startDate.month}/${startDate.year}",
+                                style: const TextStyle(fontSize: 16),
+                              )
+                            : const Text("")),
+                  ),
                 ),
               ),
               const Gap(10),
               const Text("Date Fin",
-                  style:  TextStyle(
-                      fontSize: 17, fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
               const SizedBox(
                 height: 10,
               ),
@@ -122,7 +165,7 @@ class _AjouterMissionState extends State<AjouterMission> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100));
                   if (newFinDate == null) return;
-
+          
                   setState(() {
                     isPicking_2 = true;
                     finDate = newFinDate;
@@ -130,25 +173,23 @@ class _AjouterMissionState extends State<AjouterMission> {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 5),
-
                   height: 48,
-                  // width: MediaQuery.sizeOf(context).width * 0.43,
                   decoration: BoxDecoration(
-                      // color: const Color.fromARGB(255, 255, 255, 255),
                       border: Border.all(color: Colors.black, width: 0.75),
                       borderRadius: BorderRadius.circular(12)),
-                  child: Center(
+                  child: Align(
+                      alignment: Alignment.centerLeft,
                       child: isPicking_2
-                          ? Text(
-                              "${finDate.day}/${finDate.month}/${finDate.year}",
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.w700),
+                          ? Padding(
+                              padding: const EdgeInsets.only(left: 12.0),
+                              child: Text(
+                                "${finDate.day}/${finDate.month}/${finDate.year}",
+                                style: const TextStyle(fontSize: 16),
+                              ),
                             )
                           : const Text("")),
                 ),
               ),
-              
-              
               const Gap(10),
               AddAvisTField(
                 title: 'Point de depart',
@@ -190,35 +231,42 @@ class _AjouterMissionState extends State<AjouterMission> {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () async {},
+                      onPressed: () async {
+                        if (formstate.currentState!.validate()) {
+                          await ajouterMission();
+                          afficherAlert();
+                        } else {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            title: 'Erreur',
+                            text: 'Ajouter Les informations necessaires',
+                          );
+                        }
+                      },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(mainColor),
-                        padding:
-                            //  isLoading
-                            //     ? MaterialStateProperty.all(
-                            //         const EdgeInsets.all(9))
-                            //     :
-                            MaterialStateProperty.all(const EdgeInsets.all(12)),
+                        padding: isLoading
+                            ? MaterialStateProperty.all(const EdgeInsets.all(9))
+                            : MaterialStateProperty.all(
+                                const EdgeInsets.all(12)),
                         shape: MaterialStateProperty.all(
                           RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
                       ),
-                      child:
-                          // isLoading
-                          //     ? Center(
-                          //         child:
-                          //             LoadingAnimationWidget.staggeredDotsWave(
-                          //           color: whiteColor,
-                          //           size: 32,
-                          //         ),
-                          //       )
-                          //     :
-                          const Text(
-                        "Ajouter une Mission",
-                        style: TextStyle(fontSize: 16, color: whiteColor),
-                      ),
+                      child: isLoading
+                          ? Center(
+                              child: LoadingAnimationWidget.staggeredDotsWave(
+                                color: whiteColor,
+                                size: 32,
+                              ),
+                            )
+                          : const Text(
+                              "Ajouter une Mission",
+                              style: TextStyle(fontSize: 16, color: whiteColor),
+                            ),
                     ),
                   ),
                 ],

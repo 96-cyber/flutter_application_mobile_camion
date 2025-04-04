@@ -11,8 +11,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-import '../shared/searchtextfield.dart';
-
 class ListCamion extends StatefulWidget {
   const ListCamion({super.key});
 
@@ -62,9 +60,9 @@ class _ListCamionState extends State<ListCamion> {
             backgroundColor: Colors.white,
             body: Center(
                 child: LoadingAnimationWidget.discreteCircle(
-            size: 32,
-            color: const Color.fromARGB(255, 16, 16, 16),
-          )))
+              size: 32,
+              color: const Color.fromARGB(255, 16, 16, 16),
+            )))
         : Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.white,
@@ -148,7 +146,11 @@ class _ListCamionState extends State<ListCamion> {
                                 document.data()! as Map<String, dynamic>;
                             return GestureDetector(
                               onTap: () async {
-                                Get.to(() => const CamionDetails());
+                                Get.to(() => CamionDetails(
+                                      camionId: data['camion_id'],
+                                      userId: userData['uid'],
+                                          userRole: userData['role'],
+                                    ));
                               },
                               child: Card(
                                 child: Column(
@@ -263,7 +265,6 @@ class _ListCamionState extends State<ListCamion> {
                                                                             return;
                                                                           Navigator.of(context)
                                                                               .pop();
-
                                                                           setState(
                                                                               () {});
                                                                         },
@@ -389,9 +390,9 @@ class _ListCamionState extends State<ListCamion> {
                                                                   'camion_id'])
                                                               .delete();
                                                         },
-                                                        child: const Icon(
-                                                            Icons.delete,
-                                                            color: Colors.red)),
+                                                        child:  const Icon(
+                                                            CupertinoIcons.trash_circle,
+                                                            color: Colors.red, size: 28,)),
                                                   ],
                                                 )
                                               : Container(),

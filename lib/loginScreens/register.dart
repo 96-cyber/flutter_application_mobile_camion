@@ -4,6 +4,7 @@ import 'package:flutter_application_mobile_camion/loginScreens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mobile_camion/screens.dart';
+import 'package:gap/gap.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:get/get.dart';
 import 'package:quickalert/quickalert.dart';
@@ -94,6 +95,7 @@ class _RegisterPageState extends State<RegisterPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // const Gap(90),
               const Text(
                 "Inscription",
                 style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),

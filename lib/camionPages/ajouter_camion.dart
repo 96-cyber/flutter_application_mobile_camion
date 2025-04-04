@@ -1,11 +1,9 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mobile_camion/loginScreens/login.dart';
-import 'package:flutter_application_mobile_camion/screens.dart';
 import 'package:gap/gap.dart';
-import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:uuid/uuid.dart';
@@ -34,10 +32,10 @@ class _AjouterCamionState extends State<AjouterCamion> {
     });
 
     try {
-      CollectionReference course =
+      CollectionReference camion =
           FirebaseFirestore.instance.collection('camions');
       String newCamionId = const Uuid().v1();
-      course.doc(newCamionId).set({
+      camion.doc(newCamionId).set({
         'camion_id' : newCamionId,
         "marque": marqueController.text,
         "Kilometrage": kilometrageController.text,

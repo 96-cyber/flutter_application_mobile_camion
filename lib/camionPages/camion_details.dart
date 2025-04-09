@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mobile_camion/missionScreens/ajouter_misssion.dart';
@@ -9,6 +10,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:uuid/uuid.dart';
 
 class CamionDetails extends StatefulWidget {
   final String camionId;
@@ -25,6 +27,37 @@ class CamionDetails extends StatefulWidget {
 }
 
 class _CamionDetailsState extends State<CamionDetails> {
+
+  Map userData = {};
+  bool isLoading = true;
+
+  getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      userData = snapshot.data()!;
+    } catch (e) {
+      print(e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -214,6 +247,20 @@ class _CamionDetailsState extends State<CamionDetails> {
                                             text:
                                                 'Voulez-vous vraiment Cloturer Cette Mission !',
                                             onConfirmBtnTap: () async {
+                                               String notificationsId = const Uuid().v1();
+                                              await FirebaseFirestore.instance
+                                                  .collection("users")
+                                                  .doc(data['user_id'])
+                                                  .collection("notification")
+                                                  .doc(notificationsId).
+                                                  set({
+                                                    "nom" : userData['nom'],
+                                                    "prenom" : userData['prenom'],
+                                                    "content": "Votre Mission est Cloturee",
+                                                    "user_id_notif" : data['user_id'],
+                                                    "date": DateTime.now(),
+                                                  });
+
                                               await FirebaseFirestore.instance
                                                   .collection("camions")
                                                   .doc(widget.camionId)

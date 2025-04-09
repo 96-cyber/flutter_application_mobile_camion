@@ -21,6 +21,9 @@ class ListCamion extends StatefulWidget {
 class _ListCamionState extends State<ListCamion> {
   TextEditingController marqueController = TextEditingController();
   TextEditingController kilometrageController = TextEditingController();
+  TextEditingController searchController = TextEditingController();
+
+  String searchText = ""; // 🆕 pour la recherche
 
   Map userData = {};
   bool isLoading = true;
@@ -49,7 +52,6 @@ class _ListCamionState extends State<ListCamion> {
   @override
   void initState() {
     getData();
-
     super.initState();
   }
 
@@ -59,10 +61,12 @@ class _ListCamionState extends State<ListCamion> {
         ? Scaffold(
             backgroundColor: Colors.white,
             body: Center(
-                child: LoadingAnimationWidget.discreteCircle(
-              size: 32,
-              color: const Color.fromARGB(255, 16, 16, 16),
-            )))
+              child: LoadingAnimationWidget.discreteCircle(
+                size: 32,
+                color: const Color.fromARGB(255, 16, 16, 16),
+              ),
+            ),
+          )
         : Scaffold(
             resizeToAvoidBottomInset: false,
             backgroundColor: Colors.white,
@@ -79,22 +83,28 @@ class _ListCamionState extends State<ListCamion> {
                   children: [
                     Icon(Icons.search, color: Colors.grey.shade600),
                     const SizedBox(width: 10),
-                    const Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Recherche...',
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
+                    Expanded(
+  child: TextField(
+    controller: searchController, 
+    onChanged: (value) {
+      setState(() {
+        searchText = value.toLowerCase();
+      });
+    },
+    decoration: const InputDecoration(
+      hintText: 'Recherche...',
+      border: InputBorder.none,
+    ),
+  ),
+),
                     userData['role'] == 'Responsable'
                         ? IconButton(
-                            onPressed: () async {
+                            onPressed: () {
                               Get.to(() => AjouterCamion());
                             },
                             icon: const Icon(Icons.add_circle_outline),
                           )
-                        : Container()
+                        : Container(),
                   ],
                 ),
               ),
@@ -105,15 +115,15 @@ class _ListCamionState extends State<ListCamion> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const Gap(05),
                   const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 5.0),
                     child: Text(
                       "Liste des Camions",
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: mainColor),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: mainColor,
+                      ),
                     ),
                   ),
                   const Gap(10),
@@ -132,37 +142,48 @@ class _ListCamionState extends State<ListCamion> {
                             ConnectionState.waiting) {
                           return Center(
                             child: LoadingAnimationWidget.discreteCircle(
-                                size: 32,
-                                color: const Color.fromARGB(255, 16, 16, 16),
-                                secondRingColor: Colors.indigo,
-                                thirdRingColor: Colors.pink.shade400),
+                              size: 32,
+                              color: const Color.fromARGB(255, 16, 16, 16),
+                              secondRingColor: Colors.indigo,
+                              thirdRingColor: Colors.pink.shade400,
+                            ),
                           );
                         }
 
+                        final filteredDocs = snapshot.data!.docs.where((doc) {
+                          final data = doc.data()! as Map<String, dynamic>;
+                          final marque =
+                              data['marque'].toString().toLowerCase();
+                          return marque.contains(searchText);
+                        }).toList();
+
                         return ListView(
-                          children: snapshot.data!.docs
-                              .map((DocumentSnapshot document) {
+                          children: filteredDocs.map((document) {
                             Map<String, dynamic> data =
                                 document.data()! as Map<String, dynamic>;
                             return GestureDetector(
-                              onTap: () async {
+                              onTap: () {
+                                setState(() {
+                                  searchText =
+                                      ""; 
+                                      searchController.clear(); 
+                                });
                                 Get.to(() => CamionDetails(
                                       camionId: data['camion_id'],
                                       userId: userData['uid'],
-                                          userRole: userData['role'],
+                                      userRole: userData['role'],
                                     ));
                               },
                               child: Card(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Container(
                                       decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: mainColor, width: 1.2),
-                                          borderRadius:
-                                              BorderRadius.circular(15),
-                                          color: Colors.white),
+                                        border: Border.all(
+                                            color: mainColor, width: 1.2),
+                                        borderRadius: BorderRadius.circular(15),
+                                        color: Colors.white,
+                                      ),
                                       child: Row(
                                         children: [
                                           SvgPicture.asset(
@@ -171,207 +192,217 @@ class _ListCamionState extends State<ListCamion> {
                                             width: 120.0,
                                             allowDrawingOutsideViewBox: true,
                                           ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
+                                          const SizedBox(height: 10),
                                           Expanded(
-                                              child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 20.0),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  data['marque'],
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  DateFormat('MMMM d,' 'y')
-                                                      .format(data['date_achat']
-                                                          .toDate()),
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  data['Kilometrage'],
-                                                  style: const TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight:
-                                                          FontWeight.bold),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 20.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    data['marque'],
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  Text(
+                                                    DateFormat('MMMM d, y')
+                                                        .format(
+                                                            data['date_achat']
+                                                                .toDate()),
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                  Text(
+                                                    data['Kilometrage'],
+                                                    style: const TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(height: 10),
+                                                ],
+                                              ),
                                             ),
-                                          )),
+                                          ),
                                           userData['role'] == 'Responsable'
                                               ? Column(
                                                   children: [
                                                     IconButton(
-                                                      onPressed: () async {
+                                                      onPressed: () {
                                                         showDialog(
                                                           context: context,
                                                           builder: (context) =>
                                                               AlertDialog(
-                                                                  backgroundColor:
-                                                                      Colors
-                                                                          .white,
-                                                                  actions: [
-                                                                    TextButton(
-                                                                        onPressed:
-                                                                            () {
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                        },
-                                                                        child:
-                                                                            const Text(
-                                                                          "Retour",
-                                                                          style:
-                                                                              TextStyle(color: Colors.red),
-                                                                        )),
-                                                                    TextButton(
-                                                                        onPressed:
-                                                                            () async {
-                                                                          await FirebaseFirestore
-                                                                              .instance
-                                                                              .collection('camions')
-                                                                              .doc(data['camion_id'])
-                                                                              .update({
-                                                                            'marque': marqueController.text == ''
-                                                                                ? data['marque']
-                                                                                : marqueController.text,
-                                                                            'Kilometrage': kilometrageController.text == ''
-                                                                                ? data['Kilometrage']
-                                                                                : kilometrageController.text,
-                                                                          });
-                                                                          marqueController
-                                                                              .clear();
-                                                                          kilometrageController
-                                                                              .clear();
-                                                                          if (!mounted)
-                                                                            return;
-                                                                          Navigator.of(context)
-                                                                              .pop();
-                                                                          setState(
-                                                                              () {});
-                                                                        },
-                                                                        child:
-                                                                            const Text(
-                                                                          "Modifier",
-                                                                          style:
-                                                                              TextStyle(color: mainColor),
-                                                                        ))
-                                                                  ],
-                                                                  contentPadding:
-                                                                      const EdgeInsets
-                                                                          .all(
-                                                                          20),
-                                                                  content:
-                                                                      SizedBox(
-                                                                    height: 250,
+                                                            backgroundColor:
+                                                                Colors.white,
+                                                            actions: [
+                                                              TextButton(
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                  "Retour",
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .red),
+                                                                ),
+                                                              ),
+                                                              TextButton(
+                                                                onPressed:
+                                                                    () async {
+                                                                  await FirebaseFirestore
+                                                                      .instance
+                                                                      .collection(
+                                                                          'camions')
+                                                                      .doc(data[
+                                                                          'camion_id'])
+                                                                      .update({
+                                                                    'marque': marqueController
+                                                                            .text
+                                                                            .isEmpty
+                                                                        ? data[
+                                                                            'marque']
+                                                                        : marqueController
+                                                                            .text,
+                                                                    'Kilometrage': kilometrageController
+                                                                            .text
+                                                                            .isEmpty
+                                                                        ? data[
+                                                                            'Kilometrage']
+                                                                        : kilometrageController
+                                                                            .text,
+                                                                  });
+                                                                  marqueController
+                                                                      .clear();
+                                                                  kilometrageController
+                                                                      .clear();
+                                                                  if (!mounted)
+                                                                    return;
+                                                                  Navigator.of(
+                                                                          context)
+                                                                      .pop();
+                                                                  setState(
+                                                                      () {});
+                                                                },
+                                                                child:
+                                                                    const Text(
+                                                                  "Modifier",
+                                                                  style: TextStyle(
+                                                                      color:
+                                                                          mainColor),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                            contentPadding:
+                                                                const EdgeInsets
+                                                                    .all(20),
+                                                            content: SizedBox(
+                                                              height: 250,
+                                                              child: Column(
+                                                                children: [
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width,
+                                                                    height: 100,
                                                                     child:
-                                                                        Column(
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width:
-                                                                              MediaQuery.of(context).size.width * 0.9, // <-- TextField width
-                                                                          height:
-                                                                              100, // <-- TextField height
-                                                                          child:
-                                                                              TextField(
-                                                                            controller:
-                                                                                marqueController,
-                                                                            maxLines:
-                                                                                null,
-                                                                            expands:
-                                                                                true,
-                                                                            keyboardType:
-                                                                                TextInputType.multiline,
-                                                                            decoration:
-                                                                                InputDecoration(
-                                                                              // filled: true,
-                                                                              fillColor: Colors.black38,
-                                                                              hintText: data['marque'],
-                                                                              hintStyle: const TextStyle(color: Colors.black87),
-                                                                              enabledBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                                borderSide: const BorderSide(
-                                                                                  color: Color.fromARGB(255, 220, 220, 220),
-                                                                                ),
-                                                                              ),
-                                                                              border: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                              ),
-                                                                              focusedBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                                borderSide: const BorderSide(
-                                                                                  color: Color.fromARGB(255, 220, 220, 220),
-                                                                                ),
-                                                                              ),
-                                                                              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        const Gap(
-                                                                            20),
-                                                                        SizedBox(
-                                                                          width:
-                                                                              MediaQuery.of(context).size.width * 0.9, // <-- TextField width
-                                                                          height:
-                                                                              100, // <-- TextField height
-                                                                          child:
-                                                                              TextField(
-                                                                            controller:
-                                                                                kilometrageController,
-                                                                            maxLines:
-                                                                                null,
-                                                                            expands:
-                                                                                true,
-                                                                            keyboardType:
-                                                                                TextInputType.multiline,
-                                                                            decoration:
-                                                                                InputDecoration(
-                                                                              // filled: true,
-                                                                              fillColor: Colors.black38,
-                                                                              hintText: data['Kilometrage'],
-                                                                              hintStyle: const TextStyle(color: Colors.black87),
-                                                                              enabledBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                                borderSide: const BorderSide(
-                                                                                  color: Color.fromARGB(255, 220, 220, 220),
-                                                                                ),
-                                                                              ),
-                                                                              border: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                              ),
-                                                                              focusedBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(25),
-                                                                                borderSide: const BorderSide(
-                                                                                  color: Color.fromARGB(255, 220, 220, 220),
-                                                                                ),
-                                                                              ),
-                                                                              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        const Gap(
-                                                                            20),
-                                                                      ],
+                                                                        TextField(
+                                                                      controller:
+                                                                          marqueController,
+                                                                      maxLines:
+                                                                          null,
+                                                                      expands:
+                                                                          true,
+                                                                      keyboardType:
+                                                                          TextInputType
+                                                                              .multiline,
+                                                                      decoration:
+                                                                          InputDecoration(
+                                                                        hintText:
+                                                                            data['marque'],
+                                                                        hintStyle:
+                                                                            const TextStyle(color: Colors.black87),
+                                                                        enabledBorder: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25),
+                                                                            borderSide: const BorderSide(color: Color.fromARGB(255, 220, 220, 220))),
+                                                                        border: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25)),
+                                                                        focusedBorder: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25),
+                                                                            borderSide: const BorderSide(color: Color.fromARGB(255, 220, 220, 220))),
+                                                                        contentPadding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                15,
+                                                                            vertical:
+                                                                                15),
+                                                                      ),
                                                                     ),
-                                                                  )),
+                                                                  ),
+                                                                  const Gap(20),
+                                                                  SizedBox(
+                                                                    width: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width,
+                                                                    height: 100,
+                                                                    child:
+                                                                        TextField(
+                                                                      controller:
+                                                                          kilometrageController,
+                                                                      maxLines:
+                                                                          null,
+                                                                      expands:
+                                                                          true,
+                                                                      keyboardType:
+                                                                          TextInputType
+                                                                              .multiline,
+                                                                      decoration:
+                                                                          InputDecoration(
+                                                                        hintText:
+                                                                            data['Kilometrage'],
+                                                                        hintStyle:
+                                                                            const TextStyle(color: Colors.black87),
+                                                                        enabledBorder: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25),
+                                                                            borderSide: const BorderSide(color: Color.fromARGB(255, 220, 220, 220))),
+                                                                        border: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25)),
+                                                                        focusedBorder: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                                BorderRadius.circular(25),
+                                                                            borderSide: const BorderSide(color: Color.fromARGB(255, 220, 220, 220))),
+                                                                        contentPadding: const EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal:
+                                                                                15,
+                                                                            vertical:
+                                                                                15),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
                                                         );
                                                       },
                                                       icon: const Icon(
@@ -381,24 +412,28 @@ class _ListCamionState extends State<ListCamion> {
                                                       ),
                                                     ),
                                                     GestureDetector(
-                                                        onTap: () async {
-                                                          await FirebaseFirestore
-                                                              .instance
-                                                              .collection(
-                                                                  "camions")
-                                                              .doc(data[
-                                                                  'camion_id'])
-                                                              .delete();
-                                                        },
-                                                        child:  const Icon(
-                                                            CupertinoIcons.trash_circle,
-                                                            color: Colors.red, size: 28,)),
+                                                      onTap: () async {
+                                                        await FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                "camions")
+                                                            .doc(data[
+                                                                'camion_id'])
+                                                            .delete();
+                                                      },
+                                                      child: const Icon(
+                                                        CupertinoIcons
+                                                            .trash_circle,
+                                                        color: Colors.red,
+                                                        size: 28,
+                                                      ),
+                                                    ),
                                                   ],
                                                 )
                                               : Container(),
                                         ],
                                       ),
-                                    )
+                                    ),
                                   ],
                                 ),
                               ),

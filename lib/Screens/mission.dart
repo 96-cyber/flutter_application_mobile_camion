@@ -15,23 +15,25 @@ class _MissionState extends State<Mission> {
   Widget build(BuildContext context) {
     return  Scaffold(
       backgroundColor: Colors.white,
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Center(
-            child: 
-        IconButton(onPressed: ()async{
-           await FirebaseAuth.instance.signOut();
-                                  if (!mounted) return;
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                      MaterialPageRoute(
-                                          builder: (context) => const LoginPage()),
-                                      (route) => false);
-        },
-         icon: const Icon(Icons.logout),),
-          )
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Center(
+              child: 
+          IconButton(onPressed: ()async{
+             await FirebaseAuth.instance.signOut();
+                                    if (!mounted) return;
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                        MaterialPageRoute(
+                                            builder: (context) => const LoginPage()),
+                                        (route) => false);
+          },
+           icon: const Icon(Icons.logout),),
+            )
+          ],
+        ),
       ),
     );
   }

@@ -1,8 +1,15 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_application_mobile_camion/Screens/mission.dart';
 import 'package:flutter_application_mobile_camion/camionPages/list_camion.dart';
+import 'package:flutter_application_mobile_camion/chauffeur/listchauffeur.dart';
+import 'package:flutter_application_mobile_camion/notificationsPages/notifications.dart';
+import 'package:flutter_application_mobile_camion/profileScreens/profile.dart';
 import 'package:flutter_application_mobile_camion/shared/colors.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:line_awesome_flutter/line_awesome_flutter.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class Screens extends StatefulWidget {
   const Screens({super.key});
@@ -12,8 +19,36 @@ class Screens extends StatefulWidget {
 }
 
 class _ScreensState extends State<Screens> {
+    Map userData = {};
+  bool isLoading = true;
 
-    final PageController _pageController = PageController();
+  getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      userData = snapshot.data()!;
+    } catch (e) {
+      print(e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+    @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+  final PageController _pageController = PageController();
 
   int currentPage = 0;
 
@@ -23,52 +58,66 @@ class _ScreensState extends State<Screens> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
-     return 
-         Scaffold(
+    return isLoading
+        ? Scaffold(
             backgroundColor: Colors.white,
-            bottomNavigationBar: Padding(
-              padding:
-                   EdgeInsets.only(
-                    left: MediaQuery.of(context).size.width / 4 ,
-                   right: MediaQuery.of(context).size.width / 4, 
-                   top: 4, 
-                   bottom: 4),
-              child: GNav(
-                gap: 10,
-                color: Colors.grey,
-                activeColor: mainColor,
-                curve: Curves.decelerate,
-                padding: const EdgeInsets.only(bottom: 10, left: 6, right: 6, top: 2),
-                onTabChange: (index) {
-                  _pageController.jumpToPage(index);
-                  setState(() {
-                    currentPage = index;
-                  });
-                },
-                tabs: const [
-                      GButton(
-                          icon: Icons.person_2_outlined,
-                          text: 'Camions',
-                        ),
-                         GButton(
-                          icon: Icons.notification_add,
-                          text: 'Mission',
-                        ),
-                ],
-              ),
+            body: Center(
+              child: LoadingAnimationWidget.discreteCircle(
+                  size: 32,
+                  color: const Color.fromARGB(255, 16, 16, 16),
+                  secondRingColor: Colors.indigo,
+                  thirdRingColor: Colors.pink.shade400),
             ),
-            body: PageView(
-              onPageChanged: (index) {},
-              physics: const NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: const [
-                 ListCamion(),
-                 Mission(),
-              ],
+          )
+        : 
+    Scaffold(
+      backgroundColor: Colors.white,
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.only(left: 25, right: 25, top: 4, bottom: 4),
+        child: GNav(
+          backgroundColor: Colors.white,
+          gap: 10,
+          color: Colors.grey,
+          activeColor: mainColor,
+          curve: Curves.decelerate,
+          padding: const EdgeInsets.only(bottom: 10, left: 6, right: 6, top: 2),
+          onTabChange: (index) {
+            _pageController.jumpToPage(index);
+            setState(() {
+              currentPage = index;
+            });
+          },
+          tabs:  [
+            const GButton(
+              icon: Icons.list_alt,
+              text: 'List Camion',
             ),
-          );
+          userData['role'] == 'chauffeur' ?  const GButton(
+              icon: Icons.notifications_active_outlined,
+              text: 'Notifications',
+            ): const GButton(
+              icon: CupertinoIcons.list_number_rtl,
+              text: 'Chauffeur',
+            ),
+            const GButton(
+              icon: CupertinoIcons.person_alt_circle,
+              text: 'Profile',
+            ),
+          ],
+        ),
+      ),
+      body: PageView(
+        onPageChanged: (index) {},
+        physics: const NeverScrollableScrollPhysics(),
+        controller: _pageController,
+        children:  [
+          const  ListCamion(),
+          userData['role'] == 'chauffeur' ? const Notifications(): const ListChaffeurs(),
+          const Profile(),
+        ],
+      ),
+    );
   }
 }

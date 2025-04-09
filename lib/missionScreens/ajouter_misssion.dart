@@ -53,8 +53,8 @@ class _AjouterMissionState extends State<AjouterMission> {
         'end_date': finDate,
         'point_depart': pointdepartController.text,
         'destination': destinationController.text,
-        'distance': distanceController.text,
-        'consommation': consommationController.text,
+        'distance': "${distanceController.text}Km",
+        'consommation': "${consommationController.text}L",
       });
     } catch (err) {
       if (!mounted) return;
@@ -131,11 +131,8 @@ class _AjouterMissionState extends State<AjouterMission> {
                 },
                 child: Container(
                   margin: const EdgeInsets.symmetric(vertical: 5),
-          
                   height: 48,
-                  // width: MediaQuery.sizeOf(context).width * 0.43,
                   decoration: BoxDecoration(
-                      // color: const Color.fromARGB(255, 255, 255, 255),
                       border: Border.all(color: Colors.black, width: 0.75),
                       borderRadius: BorderRadius.circular(12)),
                   child: Padding(
@@ -210,6 +207,7 @@ class _AjouterMissionState extends State<AjouterMission> {
               ),
               const Gap(10),
               AddAvisTField(
+                textInputType: TextInputType.number,
                 title: 'distance(Km)',
                 text: '',
                 controller: distanceController,
@@ -219,6 +217,7 @@ class _AjouterMissionState extends State<AjouterMission> {
               ),
               const Gap(10),
               AddAvisTField(
+                  textInputType: TextInputType.number,
                 title: 'Consommation',
                 text: '',
                 controller: consommationController,
@@ -232,18 +231,44 @@ class _AjouterMissionState extends State<AjouterMission> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        if (formstate.currentState!.validate()) {
-                          await ajouterMission();
-                          afficherAlert();
-                        } else {
-                          QuickAlert.show(
-                            context: context,
-                            type: QuickAlertType.error,
-                            title: 'Erreur',
-                            text: 'Ajouter Les informations necessaires',
-                          );
-                        }
-                      },
+  if (formstate.currentState!.validate()) {
+    // Vérifier que la date de début est avant la date de fin
+    if (!startDate.isBefore(finDate)) {
+      QuickAlert.show(
+        context: context,
+        type: QuickAlertType.warning,
+        title: 'Date invalide',
+        text: 'La date de début doit être antérieure à la date de fin.',
+      );
+      return;
+    }
+
+    await ajouterMission();
+    afficherAlert();
+  } else {
+    QuickAlert.show(
+      context: context,
+      type: QuickAlertType.error,
+      title: 'Erreur',
+      text: 'Ajouter les informations nécessaires',
+    );
+  }
+},
+
+                      // onPressed: () async {
+                        // if (formstate.currentState!.validate()) {
+                        //   await ajouterMission();
+                        //   afficherAlert();
+                        // } else {
+                        //   QuickAlert.show(
+                        //     context: context,
+                        //     type: QuickAlertType.error,
+                        //     title: 'Erreur',
+                        //     text: 'Ajouter Les informations necessaires',
+                        //   );
+                        // }
+                        
+                      // },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(mainColor),
                         padding: isLoading

@@ -4,8 +4,10 @@ class AddAvisTField extends StatelessWidget {
   final String title;
   final String text;
   final TextEditingController controller;
+  final TextInputType textInputType;
   final String? Function(String?)? validator;
-  const AddAvisTField({super.key, required this.title, required this.text, required this.controller, required this.validator});
+
+  const AddAvisTField({super.key, required this.title, required this.text, required this.controller, required this.validator,  this.textInputType = TextInputType.text});
 
   @override
   Widget build(BuildContext context) {
@@ -15,6 +17,7 @@ class AddAvisTField extends StatelessWidget {
            Text(title, style:  const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10,),
           TextField(
+             keyboardType: textInputType,
             controller: controller,
             decoration: InputDecoration(
               filled: true,

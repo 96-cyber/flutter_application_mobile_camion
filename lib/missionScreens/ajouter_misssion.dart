@@ -123,7 +123,7 @@ class _AjouterMissionState extends State<AjouterMission> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100));
                   if (newStartDate == null) return;
-          
+
                   setState(() {
                     isPicking = true;
                     startDate = newStartDate;
@@ -162,7 +162,7 @@ class _AjouterMissionState extends State<AjouterMission> {
                       firstDate: DateTime(2000),
                       lastDate: DateTime(2100));
                   if (newFinDate == null) return;
-          
+
                   setState(() {
                     isPicking_2 = true;
                     finDate = newFinDate;
@@ -217,7 +217,7 @@ class _AjouterMissionState extends State<AjouterMission> {
               ),
               const Gap(10),
               AddAvisTField(
-                  textInputType: TextInputType.number,
+                textInputType: TextInputType.number,
                 title: 'Consommation',
                 text: '',
                 controller: consommationController,
@@ -231,43 +231,43 @@ class _AjouterMissionState extends State<AjouterMission> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-  if (formstate.currentState!.validate()) {
-    // Vérifier que la date de début est avant la date de fin
-    if (!startDate.isBefore(finDate)) {
-      QuickAlert.show(
-        context: context,
-        type: QuickAlertType.warning,
-        title: 'Date invalide',
-        text: 'La date de début doit être antérieure à la date de fin.',
-      );
-      return;
-    }
+                        if (formstate.currentState!.validate()) {
+                          if (!startDate.isBefore(finDate)) {
+                            QuickAlert.show(
+                              context: context,
+                              type: QuickAlertType.warning,
+                              title: 'Date invalide',
+                              text:
+                                  'La date de début doit être antérieure à la date de fin.',
+                            );
+                            return;
+                          }
 
-    await ajouterMission();
-    afficherAlert();
-  } else {
-    QuickAlert.show(
-      context: context,
-      type: QuickAlertType.error,
-      title: 'Erreur',
-      text: 'Ajouter les informations nécessaires',
-    );
-  }
-},
+                          await ajouterMission();
+                          afficherAlert();
+                        } else {
+                          QuickAlert.show(
+                            context: context,
+                            type: QuickAlertType.error,
+                            title: 'Erreur',
+                            text: 'Ajouter les informations nécessaires',
+                          );
+                        }
+                      },
 
                       // onPressed: () async {
-                        // if (formstate.currentState!.validate()) {
-                        //   await ajouterMission();
-                        //   afficherAlert();
-                        // } else {
-                        //   QuickAlert.show(
-                        //     context: context,
-                        //     type: QuickAlertType.error,
-                        //     title: 'Erreur',
-                        //     text: 'Ajouter Les informations necessaires',
-                        //   );
-                        // }
-                        
+                      // if (formstate.currentState!.validate()) {
+                      //   await ajouterMission();
+                      //   afficherAlert();
+                      // } else {
+                      //   QuickAlert.show(
+                      //     context: context,
+                      //     type: QuickAlertType.error,
+                      //     title: 'Erreur',
+                      //     text: 'Ajouter Les informations necessaires',
+                      //   );
+                      // }
+
                       // },
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(mainColor),

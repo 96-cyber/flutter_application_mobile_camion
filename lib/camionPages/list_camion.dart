@@ -10,6 +10,8 @@ import 'package:gap/gap.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:quickalert/quickalert.dart';
+import 'package:uuid/uuid.dart';
 
 class ListCamion extends StatefulWidget {
   const ListCamion({super.key});
@@ -49,6 +51,17 @@ class _ListCamionState extends State<ListCamion> {
     });
   }
 
+  sendNotif() async {
+    CollectionReference notif =
+        FirebaseFirestore.instance.collection('notification');
+    String newNotifId = const Uuid().v1();
+    notif.doc(newNotifId).set({
+      'titre': "Demande de camion",
+      "content": "Une demande de camion a été envoyée",
+      "date": DateTime.now(),
+    });
+  }
+
   @override
   void initState() {
     getData();
@@ -84,19 +97,19 @@ class _ListCamionState extends State<ListCamion> {
                     Icon(Icons.search, color: Colors.grey.shade600),
                     const SizedBox(width: 10),
                     Expanded(
-  child: TextField(
-    controller: searchController, 
-    onChanged: (value) {
-      setState(() {
-        searchText = value.toLowerCase();
-      });
-    },
-    decoration: const InputDecoration(
-      hintText: 'Recherche...',
-      border: InputBorder.none,
-    ),
-  ),
-),
+                      child: TextField(
+                        controller: searchController,
+                        onChanged: (value) {
+                          setState(() {
+                            searchText = value.toLowerCase();
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Recherche...',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ),
                     userData['role'] == 'Responsable'
                         ? IconButton(
                             onPressed: () {
@@ -164,15 +177,28 @@ class _ListCamionState extends State<ListCamion> {
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  searchText =
-                                      ""; 
-                                      searchController.clear(); 
+                                  searchText = "";
+                                  searchController.clear();
                                 });
-                                Get.to(() => CamionDetails(
+                   data['etat'] == 'disponible' ?             Get.to(() => CamionDetails(
                                       camionId: data['camion_id'],
                                       userId: userData['uid'],
                                       userRole: userData['role'],
-                                    ));
+                                    )) :  QuickAlert.show(
+                                                            context: context,
+                                                            type: QuickAlertType
+                                                                .error,
+                                                            title:
+                                                                'Non Disponible',
+                                                            text:
+                                                                'Vous n\'avez pas accès à ce camion',
+                                                            onConfirmBtnTap:
+                                                                () async {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          ) ;
                               },
                               child: Card(
                                 child: Column(
@@ -428,9 +454,100 @@ class _ListCamionState extends State<ListCamion> {
                                                         size: 28,
                                                       ),
                                                     ),
+                                               data['etat'] == 'disponible' ?     IconButton(
+                                                        onPressed: () async {
+                                                          QuickAlert.show(
+                                                            context: context,
+                                                            type: QuickAlertType
+                                                                .confirm,
+                                                            title:
+                                                                'Envoyer une Reclamation!',
+                                                            text:
+                                                                'Voulez-vous vraiment envoyer une reclamation?',
+                                                            onConfirmBtnTap:
+                                                                () async {
+                                                              await sendNotif();
+                                                              await FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "camions")
+                                                                  .doc(data[
+                                                                      'camion_id'])
+                                                                  .update({
+                                                                'etat':
+                                                                    "non disponible"
+                                                              });
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          );
+                                                        },
+                                                        icon: const Icon(
+                                                          Icons
+                                                              .message_outlined,
+                                                          color: mainColor,
+                                                        ))
+                                                 : const SizedBox(),
                                                   ],
                                                 )
-                                              : Container(),
+                                              : userData['role'] ==
+                                                      'mecanicien'
+                                                  ? IconButton(
+                                                      onPressed: () async {
+                                                   data['etat'] == 'non disponible' ?      QuickAlert.show(
+                                                            context: context,
+                                                            type: QuickAlertType
+                                                                .confirm,
+                                                            title:
+                                                                'Camion Disponible',
+                                                            text:
+                                                                'Est ce que le camion est disponible?',
+                                                            onConfirmBtnTap:
+                                                                () async {
+                                                              await FirebaseFirestore
+                                                                  .instance
+                                                                  .collection(
+                                                                      "camions")
+                                                                  .doc(data[
+                                                                      'camion_id'])
+                                                                  .update({
+                                                                'etat':
+                                                                    "disponible"
+                                                              });
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          ) : QuickAlert.show(
+                                                            context: context,
+                                                            type: QuickAlertType
+                                                                .warning,
+                                                            title:
+                                                                'Disponible',
+                                                            text:
+                                                                'Le camion est deja disponible',
+                                                            onConfirmBtnTap:
+                                                                () async {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                          ) ;
+                                                      },
+                                                      icon: data['etat'] ==
+                                                              'non disponible'
+                                                          ? const Icon(
+                                                              Icons.close,
+                                                              color: Colors.red,
+                                                            )
+                                                          : const Icon(
+                                                              Icons.check,
+                                                              color:
+                                                                  Colors.green,
+                                                            ),
+                                                    )
+                                                  : Container(),
                                         ],
                                       ),
                                     ),

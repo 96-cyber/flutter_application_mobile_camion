@@ -40,6 +40,7 @@ class _AjouterCamionState extends State<AjouterCamion> {
         "marque": marqueController.text,
         "Kilometrage": kilometrageController.text,
         "date_achat": startDate,
+        'etat' : 'disponible'
         
       });
     } catch (err) {

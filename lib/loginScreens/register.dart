@@ -183,7 +183,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       style: TextStyle(color: Colors.black, fontSize: 16),
                     ),
                     underline: Container(),
-                    items: <String>['chauffeur', 'mecanicien']
+                    items: <String>['chauffeur', 'Technicien']
                         .map<DropdownMenuItem<String>>((String value) {
                       return DropdownMenuItem<String>(
                         value: value,

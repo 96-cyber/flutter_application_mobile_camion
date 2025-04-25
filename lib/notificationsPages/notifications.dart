@@ -34,7 +34,7 @@ class _NotificationsState extends State<Notifications> {
               stream: FirebaseFirestore.instance
                   .collection('users')
                   .doc(FirebaseAuth.instance.currentUser!.uid)
-                  .collection("notification")
+                  .collection("notifications")
                   .snapshots(),
               builder: (BuildContext context,
                   AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -62,7 +62,7 @@ class _NotificationsState extends State<Notifications> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          data['nom'] + " " + data["prenom"], 
+                          data['nom_responsable'] + " " + data["prenom_responsable"], 
                           style: const TextStyle(
                               color: mainColor,
                               fontSize: 17,

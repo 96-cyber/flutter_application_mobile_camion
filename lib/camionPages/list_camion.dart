@@ -110,7 +110,7 @@ class _ListCamionState extends State<ListCamion> {
                         ),
                       ),
                     ),
-                    userData['role'] == 'Responsable'
+                    userData['role'] == 'Responsable' || userData['role'] == 'admin'
                         ? IconButton(
                             onPressed: () {
                               Get.to(() => AjouterCamion());
@@ -259,7 +259,7 @@ class _ListCamionState extends State<ListCamion> {
                                               ),
                                             ),
                                           ),
-                                          userData['role'] == 'Responsable'
+                                          userData['role'] == 'Responsable' || userData['role'] == 'admin'
                                               ? Column(
                                                   children: [
                                                     IconButton(

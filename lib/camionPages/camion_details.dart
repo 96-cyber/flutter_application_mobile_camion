@@ -27,11 +27,10 @@ class CamionDetails extends StatefulWidget {
 }
 
 class _CamionDetailsState extends State<CamionDetails> {
-
   Map userData = {};
   bool isLoading = true;
 
-  getData() async {
+  getData() async { 
     setState(() {
       isLoading = true;
     });
@@ -60,7 +59,18 @@ class _CamionDetailsState extends State<CamionDetails> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return isLoading
+        ? Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: LoadingAnimationWidget.discreteCircle(
+                size: 32,
+                color: const Color.fromARGB(255, 16, 16, 16),
+              ),
+            ),
+          )
+        : 
+    Scaffold(
       backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
@@ -72,14 +82,16 @@ class _CamionDetailsState extends State<CamionDetails> {
               color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         actions: [
-          IconButton(
-              onPressed: () async {
-                Get.to(() => AjouterMission(
-                      camionId: widget.camionId,
-                      userId: widget.userId,
-                    ));
-              },
-              icon: const Icon(Icons.add_circle_outline_outlined))
+          userData['role'] == "Responsable"
+              ? IconButton(
+                  onPressed: () async {
+                    Get.to(() => AjouterMission(
+                          camionId: widget.camionId,
+                          userId: widget.userId,
+                        ));
+                  },
+                  icon: const Icon(Icons.add_circle_outline_outlined))
+              : SizedBox()
         ],
       ),
       body: Padding(
@@ -247,19 +259,22 @@ class _CamionDetailsState extends State<CamionDetails> {
                                             text:
                                                 'Voulez-vous vraiment Cloturer Cette Mission !',
                                             onConfirmBtnTap: () async {
-                                               String notificationsId = const Uuid().v1();
+                                              String notificationsId =
+                                                  const Uuid().v1();
                                               await FirebaseFirestore.instance
                                                   .collection("users")
                                                   .doc(data['user_id'])
                                                   .collection("notification")
-                                                  .doc(notificationsId).
-                                                  set({
-                                                    "nom" : userData['nom'],
-                                                    "prenom" : userData['prenom'],
-                                                    "content": "Votre Mission est Cloturee",
-                                                    "user_id_notif" : data['user_id'],
-                                                    "date": DateTime.now(),
-                                                  });
+                                                  .doc(notificationsId)
+                                                  .set({
+                                                "nom": userData['nom'],
+                                                "prenom": userData['prenom'],
+                                                "content":
+                                                    "Votre Mission est Cloturee",
+                                                "user_id_notif":
+                                                    data['user_id'],
+                                                "date": DateTime.now(),
+                                              });
 
                                               await FirebaseFirestore.instance
                                                   .collection("camions")

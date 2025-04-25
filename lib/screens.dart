@@ -7,6 +7,7 @@ import 'package:flutter_application_mobile_camion/chauffeur/listchauffeur.dart';
 import 'package:flutter_application_mobile_camion/notificationsPages/notifications.dart';
 import 'package:flutter_application_mobile_camion/notificationsPages/notifmecanicien.dart';
 import 'package:flutter_application_mobile_camion/profileScreens/profile.dart';
+import 'package:flutter_application_mobile_camion/responsablePages/list_responsable.dart';
 import 'package:flutter_application_mobile_camion/shared/colors.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
@@ -97,15 +98,21 @@ class _ScreensState extends State<Screens> {
                     icon: Icons.list_alt,
                     text: 'List Camion',
                   ),
-                  userData['role'] == 'chauffeur' || userData['role'] == 'mecanicien'
+                  userData['role'] == 'chauffeur' ||
+                          userData['role'] == 'mecanicien'
                       ? const GButton(
                           icon: Icons.notifications_active_outlined,
                           text: 'Notifications',
                         )
-                      : const GButton(
-                          icon: CupertinoIcons.list_number_rtl,
-                          text: 'Chauffeur',
-                        ),
+                      : userData['role'] == 'admin'
+                          ? const GButton(
+                              icon: CupertinoIcons.list_number_rtl,
+                              text: 'Responsable',
+                            )
+                          : const GButton(
+                              icon: CupertinoIcons.list_number_rtl,
+                              text: 'Chauffeur',
+                            ),
                   const GButton(
                     icon: CupertinoIcons.person_alt_circle,
                     text: 'Profile',
@@ -121,9 +128,11 @@ class _ScreensState extends State<Screens> {
                 const ListCamion(),
                 userData['role'] == 'chauffeur'
                     ? const Notifications()
-                    : userData['role'] == 'Responsable'
-                        ? const ListChaffeurs()
-                        : const NotifMecanicien(),
+                    : userData['role'] == 'admin'
+                        ? const ListRresponsable()
+                        : userData['role'] == 'Responsable'
+                            ? const ListChaffeurs()
+                            : const NotifMecanicien(),
                 const Profile(),
               ],
             ),

@@ -98,6 +98,7 @@ class _RegisterPageState extends State<RegisterPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                 const SizedBox(height: 100),
                 // const Gap(90),
                 const Text(
                   "Inscription",

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_mobile_camion/chauffeur/ajouterchauffeur.dart';
@@ -22,12 +23,43 @@ class _ListChaffeursState extends State<ListChaffeurs> {
       .where('role', isEqualTo: 'chauffeur')
       .snapshots();
 
+      
+      Map userData = {};
+  bool isLoading = true;
+
+  getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      DocumentSnapshot<Map<String, dynamic>> snapshot = await FirebaseFirestore
+          .instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get();
+
+      userData = snapshot.data()!;
+    } catch (e) {
+      print(e.toString());
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
             appBar: AppBar(
               actions: [
-                IconButton(
+      userData['role'] == 'admin' ? SizedBox():             IconButton(
                   icon: const Icon(
                     CupertinoIcons.add_circled_solid,
                     color: mainColor,
@@ -86,12 +118,12 @@ class _ListChaffeursState extends State<ListChaffeurs> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              SvgPicture.asset(
-                                'Asset/images/profilepic.svg',
-                                height: 95.0,
-                                width: 95.0,
-                                allowDrawingOutsideViewBox: true,
-                              ),
+                                Image.asset(
+  'Asset/images/chf.png',
+  height: 95.0,
+  width: 95.0,
+  fit: BoxFit.cover,
+),
                               const Gap(10),
                               Text(
                                 data['nom'] ?? '',

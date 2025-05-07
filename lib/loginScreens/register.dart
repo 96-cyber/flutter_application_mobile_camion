@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_mobile_camion/loginScreens/login.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mobile_camion/loginScreens/resetpassword.dart';
 import 'package:flutter_application_mobile_camion/screens.dart';
 import 'package:gap/gap.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -314,13 +315,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 const SizedBox(
                   height: 20,
                 ),
-                GestureDetector(
-                  onTap: () {},
+                 GestureDetector(
+                  onTap: () {
+                    Get.to(() => const ForgotPasswordPage());
+                  },
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        "Mot de passe oublie?",
+                        "Mot de passe oublié ?",
                         style: TextStyle(color: Colors.black),
                       ),
                     ],

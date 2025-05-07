@@ -7,6 +7,7 @@ import 'package:flutter_application_mobile_camion/loginScreens/registartiontextf
 import 'package:flutter_application_mobile_camion/loginScreens/register.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_mobile_camion/loginScreens/resetpassword.dart';
 import 'package:flutter_application_mobile_camion/screens.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:gap/gap.dart';
@@ -204,13 +205,15 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 20,
                 ),
-                GestureDetector(
-                  onTap: () {},
+                 GestureDetector(
+                  onTap: () {
+                    Get.to(() => const ForgotPasswordPage());
+                  },
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       Text(
-                        "Mot de passe oublie?",
+                        "Mot de passe oublié ?",
                         style: TextStyle(color: Colors.black),
                       ),
                     ],
